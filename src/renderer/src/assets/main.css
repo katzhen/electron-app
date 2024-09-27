@@ -1,0 +1,33 @@
+@import './base.css';
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-image: url('./wavy-lines.svg');
+  background-size: cover;
+  user-select: none;
+}
+
+#root {
+  width: calc(100% - 20px);
+  height: 100%;
+  margin: 10px;
+  padding: 10px;
+  border: solid 1px #cecece;
+  border-radius: 5px;
+}
+
+@media (max-width: 720px) {
+  .text {
+    font-size: 20px;
+  }
+}
+
+.container {
+  width: 100%;
+}
+.ant-form-item .ant-form-item-label > label {
+  color: #fff;
+}
