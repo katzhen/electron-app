@@ -2,8 +2,11 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { execFile, ChildProcess } from 'child_process'
 
-let pythonProcess: any = null
+let pythonProcess: ChildProcess | undefined = undefined
+
+const PY_APP_NAME = 'app.exe'
 
 function createWindow(): void {
   // Create the browser window.
@@ -37,24 +40,34 @@ function createWindow(): void {
   }
 }
 
+const getAppPath = () => {
+  const appPath = join(process.resourcesPath, PY_APP_NAME)
+  const fs = require('fs')
+  if (fs.existsSync(appPath)) {
+    return appPath
+  }
+  return join(app.getAppPath(), 'backend', 'dist', PY_APP_NAME)
+}
+
 // 启动服务
 const startServer = () => {
-  const apiPath = join(app.getAppPath(), 'backend', 'dist', 'app.exe')
-  console.log('apiPath', apiPath)
-  pythonProcess = require('child_process').execFile(apiPath)
-  if (pythonProcess == null) {
-    console.error('python server start failed.')
-  } else {
+  const appPath = getAppPath()
+  console.log(appPath)
+  pythonProcess = execFile(appPath)
+  console.log(pythonProcess?.pid)
+  if (pythonProcess) {
     console.log('python server start success.')
+  } else {
+    console.error('python server start failed.')
   }
 }
 
 // 停止服务
 const stopServer = () => {
-  if (pythonProcess != null) {
-    pythonProcess?.kill()
+  if (pythonProcess) {
+    pythonProcess?.kill('SIGTERM')
     console.log('python server stop success.')
-    pythonProcess = null
+    pythonProcess = undefined
   }
 }
 // This method will be called when Electron has finished
@@ -83,6 +96,10 @@ app.whenReady().then(() => {
   })
 })
 
+app.on('before-quit', () => {
+  stopServer()
+})
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -90,7 +107,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-  stopServer()
 })
 
 // In this file you can include the rest of your app"s specific main process
