@@ -6,3 +6,4 @@ out
 .vscode
 backend/build/*
 *.spec
+__pycache__
