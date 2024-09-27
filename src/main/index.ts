@@ -53,8 +53,11 @@ const getAppPath = () => {
 const startServer = () => {
   const appPath = getAppPath()
   console.log(appPath)
+  if (pythonProcess) {
+    console.log('python server is running.')
+    return
+  }
   pythonProcess = execFile(appPath)
-  console.log(pythonProcess?.pid)
   if (pythonProcess) {
     console.log('python server start success.')
   } else {
